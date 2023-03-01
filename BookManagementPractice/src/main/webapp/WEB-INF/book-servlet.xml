@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd 
+    http://www.springframework.org/schema/aop 
+    http://www.springframework.org/schema/aop/spring-aop.xsd 
+        http://www.springframework.org/schema/mvc 
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context.xsd
+    http://www.springframework.org/schema/tx
+    http://www.springframework.org/schema/tx/spring-tx.xsd">
+    
+    <!--component-scan telling IOC container to create beans in give package -->
+    <context:component-scan base-package="com.book.*"></context:component-scan> 
+    
+     <mvc:annotation-driven></mvc:annotation-driven>
+    <mvc:resources location="/img/" mapping="/img/**"></mvc:resources>
+    
+    <bean id="viewResolver" class="org.springframework.web.servlet.view.UrlBasedViewResolver"> <!-- /WEB-INF/jsp/myData.jsp-->
+    	<property name="viewClass" value="org.springframework.web.servlet.view.JstlView"></property> <!--  property for jsp -->
+    	<property name="prefix" value="/pages/"></property> <!--  -->
+    	<property name="suffix" value=".jsp"></property>
+    </bean>
+    
+    <bean id="myDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+    	<property name="driverClassName" value="com.mysql.jdbc.Driver"></property>
+    	<property name="url" value="jdbc:mysql://localhost:3306/booksdb"></property>
+    	<property name="username" value="root"></property>
+    	<property name="password" value="root"></property>
+    </bean>
+    <bean id="psessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+		<property name="dataSource" ref="myDataSource"/> <!-- provide db details  -->
+		<property name="packagesToScan" value="com.book.entity" /> <!-- package where we r keeping java entities -->
+		<property name="hibernateProperties">
+			<props>
+				<!-- database specific queries -->
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQL5InnoDBDialect</prop><!-- convert HQL into db sepecific queries -->
+				<!-- update existing schema -->
+				<prop key="hibernate.hbm2ddl.auto" >update</prop>
+				<!-- print my queries -->
+				<prop key="hibernate.show_sql">true</prop><!-- show queries in console -->
+			</props>
+		</property>
+	</bean>
+	<bean id="transactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+		<property name="sessionFactory" ref="psessionFactory"/>
+	</bean>
+	<tx:annotation-driven transaction-manager="transactionManager"/>
+	</beans>
